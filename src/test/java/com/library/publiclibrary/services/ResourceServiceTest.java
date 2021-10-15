@@ -37,7 +37,7 @@ public class ResourceServiceTest {
     void save(){
         //Arrange
         var resource1 = new ResourceDTO();
-        resource1.setId("1");
+        resource1.setId("216");
         resource1.setTitle("Fahrenheit 451");
         resource1.setType("libro");
         resource1.setThematic("Novela");
@@ -48,7 +48,7 @@ public class ResourceServiceTest {
         // Act
         var result = resourceService.save(resource1);
         //Assert
-        //Assertions.assertEquals("1", result.getId(), "The id cannot be null");
+
         Assertions.assertEquals("Fahrenheit 451", result.getTitle());
         Assertions.assertEquals("libro", result.getType());
         Assertions.assertEquals("Novela", result.getThematic());
@@ -56,6 +56,76 @@ public class ResourceServiceTest {
         Assertions.assertEquals(Boolean.FALSE,result.isLent());
         Assertions.assertEquals(Boolean.TRUE,result.isAvailable());
     }
+
+    @Test
+    @DisplayName("Get All resources")
+    void getAll(){
+
+        Mockito.when(repository.findAll()).thenReturn(resources());
+
+        var result = resourceService.getAll();
+
+        Assertions.assertEquals("216", result.get(0).getId());
+        Assertions.assertEquals("Fahrenheit 451", result.get(0).getTitle());
+        Assertions.assertEquals("libro", result.get(0).getType());
+        Assertions.assertEquals("Novela", result.get(0).getThematic());
+        Assertions.assertEquals(LocalDate.now(), result.get(0).getLoanDate());
+        Assertions.assertEquals(Boolean.FALSE,result.get(0).isLent());
+        Assertions.assertEquals(Boolean.TRUE,result.get(0).isAvailable());
+    }
+
+    @Test
+    @DisplayName("Get resources by id")
+    void getById() {
+
+        Mockito.when(repository.findById(Mockito.any())).thenReturn(resources().stream().findFirst());
+
+        var result = resourceService.getById(resources().get(0).getId());
+
+        Assertions.assertEquals("Fahrenheit 451", result.getTitle());
+        Assertions.assertEquals("libro", result.getType());
+        Assertions.assertEquals("Novela", result.getThematic());
+        Assertions.assertEquals(LocalDate.now(), result.getLoanDate());
+        Assertions.assertEquals(Boolean.FALSE,result.isLent());
+        Assertions.assertEquals(Boolean.TRUE,result.isAvailable());
+    }
+
+    @Test
+    @DisplayName("Update resource")
+    void update() {
+        var recurso2 = new ResourceDTO();
+        recurso2.setId("216");
+        recurso2.setTitle("Fahrenheit 451");
+        recurso2.setType("libro");
+        recurso2.setThematic("Novela");
+        recurso2.setLoanDate(LocalDate.now());
+        recurso2.setLent(Boolean.FALSE);
+        recurso2.setAvailable(Boolean.TRUE);
+
+        Mockito.when(repository.save(Mockito.any())).thenReturn(mapper.fromModel(recurso2));
+        Mockito.when(repository.findById(recurso2.getId())).thenReturn(resources().stream().findFirst());
+        var result = resourceService.update(recurso2);
+
+        Assertions.assertEquals("Fahrenheit 451", result.getTitle());
+        Assertions.assertEquals("libro", result.getType());
+        Assertions.assertEquals("Novela", result.getThematic());
+        Assertions.assertEquals(LocalDate.now(), result.getLoanDate());
+        Assertions.assertEquals(Boolean.FALSE,result.isLent());
+        Assertions.assertEquals(Boolean.TRUE,result.isAvailable());
+    }
+
+    @Test
+    @DisplayName("Delete resource")
+    void delete(){
+        var resource3 = new ResourceDTO();
+        resource3.setId("216");
+
+        Mockito.when(repository.findById(resource3.getId())).thenReturn(resources().stream().findFirst());
+        resourceService.delete("216");
+        Mockito.verify(repository).deleteById("216");
+    }
+
+
 
     @Test
     @DisplayName("It tests the resource's availability")
